@@ -15,10 +15,20 @@ export class GifsService {
 
 
   //Consumimos el servicio de HttpClient
-  constructor( private http: HttpClient ) {  }
+  constructor( private http: HttpClient ) {
+    this.loadLocalStorage();
+    //Envia el primer valor de _tagHistory si esta vacio envia un arreglo vacio.
+    this.searchTag(this._tagsHistory[0] || '');
+  }
 
   get tagsHistory(){
     return [...this._tagsHistory];
+  }
+
+
+  //Guardar en el local storage
+  private safeLocalStorage():void{
+    localStorage.setItem('history', JSON.stringify( this._tagsHistory ));
   }
 
   //Ordena la lista para evitar repitir tags
@@ -29,6 +39,19 @@ export class GifsService {
     }
     this._tagsHistory.unshift(tag);
     this._tagsHistory = this._tagsHistory.splice(0,10);
+    this.safeLocalStorage();
+  }
+
+  //Leer local storage
+  private loadLocalStorage():void{
+    if( !localStorage.getItem('history') ) return;
+
+    const temporal: string = localStorage.getItem('history')!;
+    this._tagsHistory = JSON.parse(temporal);
+
+    // if ( this._tagsHistory.length === 0 ) return;
+    // this.searchTag(this._tagsHistory[0]);
+
   }
 
   //Funcion para añadir tags al arreglo _tagHistory
